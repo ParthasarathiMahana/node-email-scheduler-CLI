@@ -25,8 +25,7 @@ A command-line tool to schedule and send emails at a specified time using **Node
 3. **Set up environment variables:**
    - Create a `.env` file in the project root:
    ```
-   SMTP_HOST=smtp.yourprovider.com
-   SMTP_PORT=587
+   SMTP_SERVICE=smtp-service
    SMTP_USER=your-email@example.com
    SMTP_PASS=your-email-password
    ```
