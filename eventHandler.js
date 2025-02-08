@@ -45,7 +45,6 @@ class CustomEvents extends EventEmitter{
             if(error){
                 console.log('Error while adding data to email.jason file, ', error);
             }else{
-                console.log(`Your email is successfully scheduled.`);
                 this.emit('addEmailDetails', {filePath: 'emails.json'})
             }
         })

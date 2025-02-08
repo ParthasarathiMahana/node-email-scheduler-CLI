@@ -1,5 +1,6 @@
 const CustomEvents = require('./eventHandler')
 const scheduleEmail = require('./emailScheduler')
+const fs = require('fs')
 
 console.log('🙏 Welcome, Please enter the below data to scedule your email.')
 
@@ -11,6 +12,5 @@ customEventObject.addListener('getUserInput', (data)=>{
 })
 
 customEventObject.addListener('addEmailDetails', ({filePath})=>{
-    console.log('file path is: ', filePath);
     scheduleEmail(filePath)
 })
