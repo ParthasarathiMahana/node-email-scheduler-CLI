@@ -1,13 +1,18 @@
-# 📧 CLI-Based Email Scheduler
+# 📧 CLI-Based Email Scheduler (Using BullMQ)
 
-A command-line tool to schedule and send emails at a specified time using **Node.js**. Users can schedule emails via CLI commands, and the system will send them automatically using **NodeMailer**. Additionally, an Express API is provided for listing and scheduling emails via **Postman**.
+A command-line tool to schedule and send emails at a specified time using **Node.js** and **BullMQ**. Users can schedule emails via CLI commands, and the system will enqueue them in **Redis** using BullMQ, ensuring reliable and scalable job scheduling.
+
+Additionally, an Express API is provided for listing and scheduling emails via **Postman**.
+
+---
 
 ## 📌 Features
-- 📜 **Schedule emails** using the command line.
-- 📂 **Stores pending emails** in `emails.json`.
-- ⏳ **Sends emails automatically** at the scheduled time.
-- 📡 **REST API** for scheduling emails and listing scheduled ones.
-- 🎯 **Event-driven architecture** using Node.js `events` module.
+- 💜 **Schedule emails** using the command line.
+- ⏳ **Uses BullMQ (Redis-based queue)** for reliable scheduling.
+- 📡 **REST API** for scheduling emails and listing pending jobs.
+- 🎠 **Worker-based architecture** for handling scheduled emails.
+- 📴 **Resilient against restarts** (Jobs are stored in Redis).
+- ✨ **Scalable** (Multiple workers can process jobs in parallel).
 
 ---
 
@@ -25,9 +30,17 @@ A command-line tool to schedule and send emails at a specified time using **Node
 3. **Set up environment variables:**
    - Create a `.env` file in the project root:
    ```
-   SMTP_SERVICE=smtp-service
+   SMTP_SERVICE=gmail
    SMTP_USER=your-email@example.com
    SMTP_PASS=your-email-password
+   REDIS_HOST=127.0.0.1
+   REDIS_PORT=6379
+   ```
+4. **Start Redis (if not running)**
+   - If Redis is not installed, install it from [here](https://redis.io/docs/getting-started/installation/).
+   - Start Redis server:
+   ```sh
+   redis-server
    ```
 
 ---
@@ -37,22 +50,29 @@ A command-line tool to schedule and send emails at a specified time using **Node
 ### **1️⃣ Schedule an Email via CLI**
 Run the following command:
 ```sh
-node index.js --to recipient@example.com --subject "Meeting Reminder" --message "Join the meeting at 3 PM." --time "15:00"
+node producer.js --to recipient@example.com --subject "Meeting Reminder" --message "Join the meeting at 3 PM." --delay 3600000
 ```
 **What happens?**
-- The email is stored in `emails.json`.
-- A confirmation message is displayed.
-- The email is sent at `15:00` automatically.
+- The job is added to the **BullMQ queue** in Redis.
+- A worker picks up the job at the scheduled time and sends the email.
 
 ---
 
-### **2️⃣ Start the API Server (Optional for Postman Users)**
+### **2️⃣ Start the BullMQ Worker**
+The worker listens for jobs and processes them when the time comes.
+```sh
+node worker.js
+```
+
+---
+
+### **3️⃣ Start the API Server (Optional for Postman Users)**
 Start the server to use the API:
 ```sh
 node server.js
 ```
 #### **API Endpoints:**
-- **GET** `/emails` → List all scheduled emails.
+- **GET** `/jobs` → List all scheduled jobs.
 - **POST** `/schedule` → Schedule an email via API.
 
 **Example POST request (JSON Body):**
@@ -61,33 +81,33 @@ node server.js
   "to": "recipient@example.com",
   "subject": "Follow Up",
   "message": "Let's catch up tomorrow!",
-  "time": "10:00"
+  "delay": 3600000
 }
 ```
 
 ---
 
-## 🏗 Developer Guide
+## 🏢 Developer Guide
 
 ### **Project Structure**
 ```
 email scheduler CLI/
-│── emails.json          # Stores scheduled emails
-│── index.js             # Main CLI script
-│── emailScheduler.js     # Handles scheduling & sending emails
-│── eventHandler.js       # Manages custom events
-│── server.js             # Express API for Postman users
-│── package.json          # Project dependencies
-│── .env                 # SMTP credentials
+│── producer.js          # Adds email jobs to the queue
+│── worker.js            # Listens to the queue and sends emails
+│── server.js            # Express API for scheduling emails
+│── queue.js             # BullMQ queue setup
+│── package.json         # Project dependencies
+│── .env                 # SMTP & Redis credentials
 ```
 
 ### **Technologies Used**
-- **Node.js** (for backend logic)
-- **NodeMailer** (for sending emails)
-- **fs (File System)** (to store scheduled emails)
-- **events** (for event-driven handling)
-- **Express.js** (for API endpoints)
+- **Node.js** (Backend logic)
+- **BullMQ** (Job queue for scheduling)
+- **Redis** (Persistent job storage)
+- **NodeMailer** (Sending emails)
+- **Express.js** (For API endpoints)
 
 ---
 
 👨‍💻 **Happy Coding!** 🚀
+
