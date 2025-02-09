@@ -1,32 +1,7 @@
 const fs = require('fs');
-const nodemailer = require('nodemailer');
-const { text } = require('stream/consumers');
 require('dotenv').config()
+const addEmailToQueue = require('./mq/producer')
 
-const sendMail = async ({toEmail, subject, body,time}) =>{
-    // 1. create transporter
-    const transporter = nodemailer.createTransport({
-        service: process.env.SMTP_SERVICE,
-        auth:{
-            user: process.env.SMTP_USER,
-            pass:process.env.SMTP_PASS
-        }
-    })
-    // 2. configure email details
-    const mailDetails = {
-        from: process.env.SMTP_USER,
-        to: toEmail,
-        subject: subject,
-        text: body
-    }
-    // 3. send email
-    try {
-        const res = await transporter.sendMail(mailDetails)
-        console.log("\n ✅ email sent successfully. ✅ \n");
-    } catch (error) {
-        console.log('\n ❌ error occured while sending the mail ❌ \n', error);
-    }
-}
 
 const scheduleEmail = (filePath) => {
     fs.readFile(filePath, {encoding:'utf8'}, (err, data)=>{
@@ -43,7 +18,7 @@ const scheduleEmail = (filePath) => {
                 const remainingTime = targetTime-currentTime
                 console.log((remainingTime/1000)/60+" min/s to go.");
                 
-                setTimeout(()=>sendMail(data[i]), remainingTime)
+                addEmailToQueue({'toEmail': data[i].toEmail, 'subject':data[i].subject, 'body': data[i].body}, {delay:remainingTime})
             }
         }
     })
