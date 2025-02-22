@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const {Worker} = require('bullmq')
 require('dotenv').config({path: '../.env'})
 
-const emialWorker = new Worker('emailQueue', 
+const emailWorker = new Worker('emailQueue', 
     async (job) => {
         console.log('Sending the email....')
 

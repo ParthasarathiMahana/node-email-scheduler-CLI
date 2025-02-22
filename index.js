@@ -12,5 +12,6 @@ customEventObject.addListener('getUserInput', (data)=>{
 })
 
 customEventObject.addListener('addEmailDetails', ({filePath})=>{
+    console.log("Email details appended, here is the file path", filePath);
     scheduleEmail(filePath)
 })
